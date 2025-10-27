@@ -1,0 +1,44 @@
+:OPTIMIZER=Powell
+:SENSITIVITY=Off
+:MULTIPLE_START=RRandom
+:RANDOM_NUMBER=Default
+:SEED=1234
+:OUTPUT_LEVEL=On
+:TRACE=Off
+:MAX_ITERATIONS=1000
+:RESTART_MAX=1000
+:PASS_LIMIT=2
+:FRACTIONAL_TOLERANCE=0.0003
+:TOLERANCE_MULTIPLIER=21
+:ABSOLUTE_TOLERANCE=1
+:SCALE_ABSOLUTE=1
+:VECTOR_POINTS=25
+:MCINITMETHOD=0
+:MCPAYOFFTYPE=0
+:MCRECORD=0
+:MCSCHEDULE=0
+:MCLIMIT=0
+:MCBURNIN=0
+:MCNCHAINS=2
+:MCOUTLIER=0.05
+:MCGAMMA=1
+:MCEPSILON=0.01
+:MCDELTA=0.0001
+:MCJUMP=0.05
+:MCUPDATEPAIRS=2
+:MCXOVER=0.2
+:MCTEMP=1
+:MCFTEMP=1
+:MCCOOLING=1000
+0.1<=Time to update expectations with falling prices<=365
+0.1<=Time to update expectations with Rising Prices<=365
+1<=Anchor Order<=3
+0<=Pulse Size<=500
+0.001<=Forward Trend Sensitivity<=1000
+0.001<=Immediate Speculation Sensitivity<=5
+1<=Initial value of owning a share<=10
+0.001<=Historic Speculation Sensitivity<=3
+0<=Projection time<=500
+800<=Pulse Start<=1200
+0.01<=Length of Pulse<=1400
+0.1<=Minimum Time to Update Expectations<=5

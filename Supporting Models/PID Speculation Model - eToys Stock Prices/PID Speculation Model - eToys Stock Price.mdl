@@ -1,0 +1,454 @@
+{UTF-8}
+Est of Change in Value=
+	(Value Gap-Recent Value Gap)/Projection time
+	~	$/Share/Day
+	~	A forward looking estimate of how much the value of the stock is likely to \
+		change per day given the current price and the prior prices
+	|
+
+Recent Value Gap= DELAY FIXED (
+	Value Gap, Projection time , Value Gap)
+	~	$/Share
+	~	A time delayed perceived value of the horses. Used in the simple forward \
+		projection
+	|
+
+Change in Expected Value=
+	if then else(Market Clearing Price of a Share>0,if then else(Maximum Change in Expectations\
+		>0,min(Maximum Change in Expectations,Change from Current Speculation+Change from Accumulated Speculation
+	+Change from Value Trend),
+	max(Maximum Change in Expectations,Change from Current Speculation+Change from Accumulated Speculation\
+		+Change from Value Trend
+	)),0)
+	~	$/Share/Day
+	~	Change in the expected value of owning a share from all the possible \
+		sources
+	|
+
+Minimum Time to Update Expectations=
+	0.8
+	~	Day [0.1,100]
+	~	The absolute smallest amount of time that the actors in this industry can \
+		take what they are seeing and incorporate it into their future expectations
+	|
+
+Maximum Change in Expectations=
+	Market Clearing Price of a Share/Minimum Time to Update Expectations
+	~	$/(Share*Day)
+	~	Limiting maximum value (in absolute terms) that the expectations can \
+		change in a given period of time
+	|
+
+Pulse Start=
+	0
+	~	Day [-137,440,1]
+	~	The day in the simulation that the exogenous pulse is first applied
+	|
+
+Pulse Size=
+	100
+	~	$/Share [-100,100,0.01]
+	~	Size, in thousands of dollars per share, that is added to the perception \
+		of share value in the exogenous shock
+	|
+
+Length of Pulse=
+	1
+	~	Day [0,600,1]
+	~	How long the exogenous pulse is applied
+	|
+
+Perceived Value of Owning a Share=
+	Anchored Underlying Perceived Value of Owning a Share+Exogenous Pulse in Perceived Share Ownership value
+	~	$/Share
+	~	Measure of the underlying value of owning a share (in thousands of dollars \
+		per share) as conceptualized by the participants in the market inclusive \
+		of the starting shock. NOTE: MAYBE CLARIFY NAME
+	|
+
+Exogenous Pulse in Perceived Share Ownership value=
+	Pulse Size*PULSE(Pulse Start, Length of Pulse)
+	~	$/Share
+	~	An exogenous pulse to the Perceived Value of Owning a Share. Used to \
+		initiate the dynamics of the system
+	|
+
+Anchor Order=
+	2
+	~	Dmnl
+	~	Order of the information smooth for forming perceived value of the horses
+	|
+
+Anchored Underlying Perceived Value of Owning a Share= 
+	SMOOTH N(Market Clearing Price of a Share, if then else(Value Gap<0,Time to update expectations with Rising Prices
+	,Time to update expectations with falling prices), Initial value of owning a share ,\
+		 Anchor Order)
+	~	$/Share
+	~	Measure of the underlying value of owning a share (in thousands of dollars \
+		per share) as conceptualized by the participants in the market based only \
+		on the dynamics of the marketplace.
+	|
+
+Time to update expectations with Rising Prices=
+	44.5923
+	~	Day [0.1,100,0.5]
+	~	Time for the expected value of owning a share to become incorporated into \
+		an actual underlying value of the share for when the expected value exceed \
+		the underlying perceived value of horses, e.g. prices are expected to rise
+	|
+
+Time to update expectations with falling prices=
+	0.321189
+	~	Day [0.1,100,0.025]
+	~	Time for the expected value of owning a share to become incorporated into \
+		an actual underlying value of the share for when the expected value is \
+		below the underlying perceived value of horses, e.g. prices are expected \
+		to fall
+	|
+
+Value Gap=
+	Perceived Value of Owning a Share-max(0,Market Clearing Price of a Share)
+	~	$/Share
+	~	Gap between the re
+	|
+
+Extrapolation value=
+	INTEGER(GET DATA AT TIME(Historic Prices, GET DATA LAST TIME(Historic Prices) ) +0.5\
+		)
+	~	$/Share
+	~	The rounded-up integer of the final data point in the actual historic data
+	|
+
+Historic Prices:RAW:
+	~	$/Share
+	~	EXOGENOUS DATA: Historic prices extracted from the figure in Business \
+		Dynamics
+	|
+
+Extrapolated Historic Prices=
+	if then else(Time>GET DATA LAST TIME(Historic Prices),Extrapolation value,Historic Prices\
+		)
+	~	$/Share
+	~	Historic data projected outward to the end of the simulation horizon
+	~	:SUPPLEMENTARY 
+	|
+
+Change from Value Trend=
+	Forward Trend Sensitivity*Est of Change in Value
+	~	$/Share/Day
+	~	Change in the expected value of owning a share that comes from \
+		expectations and reality being different in the projected future
+	|
+
+Forward Trend Sensitivity=
+	72.4852
+	~	Dmnl [0,100,0.01]
+	~	The relative weight the industry places on the forward trend projections \
+		for share value
+	|
+
+Projection time=
+	146.656
+	~	Day [0,365]
+	~	Time that is used for the simple forward projection for share prices used \
+		by the people in the market
+	|
+
+Cumulative Observed Speculation= INTEG (
+	Change in Observed Speculation,
+		0)
+	~	Day*$/Share
+	~	The running sum of the gaps observed between the expected value of horses \
+		and the underlying perception of horses. Conceptualized here as \
+		'speculation'
+	|
+
+Change from Accumulated Speculation=
+	Historic Speculation Sensitivity*Cumulative Observed Speculation
+	~	$/Share/Day
+	~	Change in the expected value of owning a share that comes from \
+		expectations and reality having been wrong cumulatively in the past
+	|
+
+Change from Current Speculation=
+	Immediate Speculation Sensitivity*Value Gap
+	~	$/Share/Day
+	~	Change in the expected value of owning a share that comes from \
+		expectations and reality being wrong in the moment
+	|
+
+Change in Observed Speculation=
+	Value Gap
+	~	$/Share
+	~	Change in the observed speculation in the market, which here is just the \
+		instantly observed gap between what individuals in the market expect they \
+		will receive versus their underlying perception of the value of a share
+	|
+
+Historic Speculation Sensitivity=
+	0.2956
+	~	1/(Day*Day) [0,10,0.01]
+	~	The relative weigh the industry places on the cumulative difference \
+		between current expected value and the actual underlying value of the stock
+	|
+
+Market Clearing Price of a Share= INTEG (
+	Change in Expected Value,
+		Initial value of owning a share)
+	~	$/Share
+	~	The Expected Value of Owning a Share in thousands of dollars, which here \
+		is assumed to translate into the actual market clearing value of the stock \
+		in aggregate across many buyers and sellers
+	|
+
+Immediate Speculation Sensitivity=
+	1.55251
+	~	1/Day [0,10,0.01]
+	~	The relative weight the industry places on the immediate difference \
+		between the expected future value and the underlying value
+	|
+
+Initial value of owning a share=
+	20
+	~	$/Share
+	~	The initial value of owning a share prior to the start of the speculative \
+		bubble in thousands of dollars
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 447
+	~	Day
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = -30
+	~	Day
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Day [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Day [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,60,0
+10,1,Market Clearing Price of a Share,934,549,59,31,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+12,2,48,942,254,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(942,427)|
+1,4,5,2,68,0,0,22,2,0,0,-1--1--1,|||0-0-0,1|(942,293)|
+11,5,0,942,330,8,6,33,3,0,0,2,0,0,0,0,0,0,0,0,0
+10,6,Change in Expected Value,886,330,48,27,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,7,Value Gap,389,615,44,18,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,8,1,7,1,0,45,0,0,64,0,-1--1--1,,1|(680,693)|
+10,9,Cumulative Observed Speculation,571,408,65,33,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+12,10,48,571,624,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,11,13,9,4,0,0,22,0,0,0,-1--1--1,,1|(571,481)|
+1,12,13,10,68,0,0,22,2,0,0,-1--1--1,|||0-0-0,1|(571,574)|
+11,13,0,571,527,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,14,Change in Observed Speculation,648,527,69,27,40,131,0,0,-1,0,0,0,0,0,0,0,0,0
+1,15,7,13,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(460,536)|
+10,16,Change from Accumulated Speculation,722,341,83,29,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,17,9,16,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(610,372)|
+10,18,Historic Speculation Sensitivity,583,270,70,25,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,19,18,16,1,0,43,0,0,64,0,-1--1--1,,1|(614,311)|
+1,20,16,6,1,0,43,0,0,64,0,-1--1--1,,1|(784,327)|
+10,21,Initial value of owning a share,927,771,56,18,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,22,21,1,1,0,0,2,0,128,1,-1--1--1,,1|(938,700)|
+10,23,Immediate Speculation Sensitivity,376,163,69,25,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,24,Change from Current Speculation,505,212,65,25,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,25,7,24,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(348,450)|
+1,26,23,24,1,0,43,0,0,64,0,-1--1--1,,1|(415,209)|
+1,27,24,6,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(740,206)|
+10,28,Recent Value Gap,307,881,48,18,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,29,Projection time,396,1092,48,18,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,30,29,28,1,0,0,0,0,128,0,-1--1--1,,1|(342,1007)|
+10,31,Est of Change in Value,638,1082,61,18,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,32,28,31,1,0,45,0,2,0,0,-1--1--1,|||0-0-0,1|(487,1069)|
+1,33,29,31,1,0,45,0,0,64,0,-1--1--1,,1|(501,1121)|
+10,34,Forward Trend Sensitivity,1048,687,69,23,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,35,Change from Value Trend,1209,671,48,18,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,36,31,35,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(1112,922)|
+1,37,34,35,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(1149,721)|
+1,38,35,5,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(1108,406)|
+10,39,Perceived Value of Owning a Share,466,795,67,27,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,40,39,7,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(401,686)|
+10,41,Time to update expectations with Rising Prices,891,899,75,27,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,42,Anchored Underlying Perceived Value of Owning a Share,715,816,71,41,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,43,42,39,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(602,835)|
+10,44,Time to update expectations with falling prices,814,990,63,27,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,45,Anchor Order,713,923,49,10,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,46,45,42,1,0,0,2,0,128,1,-1--1--1,,1|(712,876)|
+1,47,44,42,1,0,0,0,0,128,0,-1--1--1,,1|(775,865)|
+1,48,41,42,1,0,0,0,0,128,0,-1--1--1,,1|(796,837)|
+1,49,7,42,1,0,0,2,3,64,0,160-160-160,|||0-0-0,1|(461,711)|
+1,50,1,42,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(867,724)|
+10,51,Exogenous Pulse in Perceived Share Ownership value,491,899,92,29,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,52,51,39,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(481,883)|
+10,53,Pulse Start,500,965,40,10,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,54,Length of Pulse,636,969,59,28,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,55,Pulse Size,586,1006,39,10,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,56,53,51,1,0,0,0,0,128,0,-1--1--1,,1|(496,959)|
+1,57,54,51,1,0,0,0,0,128,0,-1--1--1,,1|(598,921)|
+1,58,55,51,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(566,971)|
+12,59,0,1050,854,20,20,4,7,0,0,-1,0,0,0,0,0,0,0,0,0
+R1
+12,60,0,1047,898,55,17,8,135,0,24,-1,0,0,0,-1--1--1,0-0-0,|10|I|0-0-0,0,0,0,0,0,0
+Trend Drives Expectations
+12,61,0,464,316,20,20,4,7,0,0,-1,0,0,0,0,0,0,0,0,0
+B1
+12,62,0,458,358,60,16,8,7,0,24,-1,0,0,0,-1--1--1,0-0-0,|10|I|0-0-0,0,0,0,0,0,0
+Expectations vs the Reality Today
+12,63,0,784,492,20,20,4,7,0,0,-1,0,0,0,0,0,0,0,0,0
+B2
+12,64,0,781,539,52,16,8,7,0,24,-1,0,0,0,-1--1--1,0-0-0,|10|I|0-0-0,0,0,0,0,0,0
+Feeling the Bubble Pressure
+12,65,0,770,705,20,20,4,135,0,0,-1,0,0,0,0,0,0,0,0,0
+R2
+12,66,0,768,747,76,26,8,135,0,24,-1,0,0,0,-1--1--1,0-0-0,|10|I|0-0-0,0,0,0,0,0,0
+Value is a Self-Fulfilling Prophecy
+1,67,21,42,1,0,0,2,1,128,1,160-160-160,|||0-0-0,1|(865,813)|
+10,68,Maximum Change in Expectations,1041,441,51,25,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,69,Minimum Time to Update Expectations,1101,551,77,18,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,70,1,68,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(1003,510)|
+1,71,68,5,1,0,43,0,2,64,0,-1--1--1,|||0-0-0,1|(1006,379)|
+1,72,69,68,1,0,45,0,2,192,0,-1--1--1,|||0-0-0,1|(1104,480)|
+1,73,1,6,1,0,0,0,0,64,0,-1--1--1,,1|(874,439)|
+1,74,7,31,1,0,0,0,0,128,0,-1--1--1,,1|(354,833)|
+1,75,7,28,1,0,43,0,2,192,0,-1--1--1,|||0-0-0,1|(301,778)|
+12,76,0,1834,290,445,304,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+Historic_and_Simulated_Prices
+12,77,0,1834,927,445,304,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+Values_and_Drivers
+12,78,0,411,18,334,48,8,135,0,24,-1,0,0,0,-1--1--1,0-0-0,|14|BU|0-0-0,0,0,0,0,0,0
+Speculative Bubble Formation via Endogenized PID Controller Model
+12,79,0,280,73,190,12,8,135,0,0,-1,0,0,0,0,0,0,0,0,0
+eToys Stock Price - May 1999 through August 2020
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Data Series
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-0|-1--1--1|255-255-255|96,96,70,0
+10,1,Historic Prices,473,97,53,10,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,Extrapolated Historic Prices,551,214,54,18,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,3,1,2,1,0,0,0,0,128,0,-1--1--1,,1|(504,175)|
+10,4,Extrapolation value,665,101,48,18,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,5,4,2,1,0,0,0,0,128,0,-1--1--1,,1|(622,182)|
+10,6,Time,571,315,29,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,7,6,2,1,0,0,0,0,64,0,-1--1--1,,1|(550,283)|
+1,8,1,4,1,0,0,0,0,128,0,-1--1--1,,1|(578,68)|
+///---\\\
+:GRAPH Values_and_Drivers
+:TITLE Values and Drivers
+:SCALE
+:VAR Exogenous Pulse in Perceived Share Ownership value|Driving Pulse
+:DATASET *1
+:LINE-WIDTH 2
+:VAR Anchored Underlying Perceived Value of Owning a Share|Underlying Perception of Value
+:DATASET *1
+:LINE-WIDTH 2
+:VAR Market Clearing Price of a Share|Simulated Market Value
+:DATASET *1
+:LINE-WIDTH 2
+:VAR Historic Prices|Historic Prices
+:DATASET *1
+:LINE-WIDTH 2
+
+:GRAPH Driver_Comparison
+:TITLE Driver Comparison
+:SCALE
+:VAR Anchored Underlying Perceived Value of Owning a Share
+:DATASET *1
+:VAR Exogenous Nth Order Smooth for Underlying Share Value
+:DATASET *1
+
+:GRAPH Historic_and_Simulated_Prices
+:TITLE Historic and Simulated Prices
+:SCALE
+:VAR Market Clearing Price of a Share|Simulated Market Value
+:DATASET 
+:LINE-WIDTH 2
+:VAR Historic Prices|Historic Prices
+:DATASET 
+:LINE-WIDTH 2
+:L<%^E!@
+1:eToys Daily.vdfx
+1:eToysHistoricPricesDaily.vdfx
+4:Time
+5:Forward Trend Sensitivity
+9:eToys Daily
+19:60,0
+24:-137
+25:447
+26:447
+57:1
+54:0
+55:0
+82:0
+86:0
+59:0
+56:0
+58:0
+71:0
+110:0
+111:0
+44:1252
+46:0
+45:5
+49:1
+50:0
+51:
+52:
+53:
+43:G:\My Drive\Endogenized PID Controller and Speculative Bubbles\Alt Formulations\eToys\HorsePricesExtrapolated.csv
+47:
+48:SampleSavList.lst
+22:$,dollar,dollars
+22:Share,Horses
+22:Day,Years
+11:EndoPIDController_eToys_Daily.voc
+100:ISDCHorse.voc
+12:EndoPIDController_eToys_Payoff_Daily.vpd
+13:eToysHistoricPricesDaily.vdfx
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:1
+72:0
+73:0
+35:Date
+36:YYYY-MM-DD
+37:1965
+38:1
+39:1
+40:2
+41:0
+95:0
+96:0
+97:0
+77:1
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:G:\My Drive\Endogenized PID Controller and Speculative Bubbles\Alt Formulations\eToys\HorsePricesExtrapolated.csv
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Arial|12||0-0-0|0-0-0|-1--1--1|0-0-0|192-192-192|-1--1--1

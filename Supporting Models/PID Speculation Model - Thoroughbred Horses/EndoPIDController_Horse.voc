@@ -1,0 +1,43 @@
+:OPTIMIZER=Powell
+:SENSITIVITY=Off
+:MULTIPLE_START=RRandom
+:RANDOM_NUMBER=Default
+:OUTPUT_LEVEL=On
+:TRACE=Off
+:MAX_ITERATIONS=1000
+:RESTART_MAX=30
+:PASS_LIMIT=2
+:FRACTIONAL_TOLERANCE=0.0003
+:TOLERANCE_MULTIPLIER=21
+:ABSOLUTE_TOLERANCE=1
+:SCALE_ABSOLUTE=1
+:VECTOR_POINTS=25
+:MCLIMIT=0
+:MCJUMP=0.05
+:MCBURNIN=0
+:MCDELTA=0.0001
+:MCTEMP=1
+:MCNCHAINS=2
+:MCUPDATEPAIRS=2
+:MCSCHEDULE=0
+:MCOUTLIER=0.05
+:MCXOVER=0.2
+:MCCOOLING=1000
+:MCINITMETHOD=0
+:MCPAYOFFTYPE=0
+:MCGAMMA=1
+:MCRECORD=0
+:MCKNN=0
+:MCEPSILON=0.01
+:MCFTEMP=1
+0.125<=Time to update expectations with falling prices<=100
+0.125<=Time to update expectations with Rising Prices<=100
+1<=Anchor Order<=100
+0<=Pulse Size<=100
+0.125<=Forward Trend Sensitivity<=50
+0.001<=Immediate Speculation Sensitivity<=5
+16<=Initial value of owning a horse<=50
+0.001<=Historic Speculation Sensitivity<=3
+0<=Projection time<=6
+1965<=Pulse Start<=1983
+0.125<=Minimum Time to Update Expectations<=10
