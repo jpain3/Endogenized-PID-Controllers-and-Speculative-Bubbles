@@ -338,6 +338,8 @@ Values_and_Drivers
 Speculative Bubble Formation via Endogenized PID Controller Model
 12,79,0,312,112,244,23,8,135,0,0,-1,0,0,0,0,0,0,0,0,0
 GameStop Stock Prices - January 2020 through January 2024
+12,80,0,999,97,198,60,8,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Developed by |<<NnN>>|Dr. James Paine|<<NnN>>|https://jpaine.info|<<NnN>>||<<NnN>>|For the article "Speculative Bubbles and Control Theory - An Endogenous Approach" in the System Dynamics Review
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *Data Series
